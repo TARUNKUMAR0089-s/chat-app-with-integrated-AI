@@ -34,7 +34,7 @@ export const addUserToProject = async ({ projectId, users, userId }) => {
   if (invalidUserIds.length > 0)
     throw new Error(`Invalid user IDs: ${invalidUserIds.join(", ")}`);
 
-  //  Find project
+
   const project = await projectModel.findById(projectId);
   console.log("Project in DB:", project);
 
@@ -42,7 +42,7 @@ export const addUserToProject = async ({ projectId, users, userId }) => {
     throw new Error("Project not found");
   }
 
-  //  Check if current user is the creator (first user in users array)
+  
  if (project.users[0].toString() !== userId.toString()) {
   throw new Error("Only the project creator can add users");
 }

@@ -10,16 +10,15 @@ import { generateResult } from './services/api.services.js';
 
 const PORT = process.env.PORT || 3000;
 
-connect(); 
+connect();
 
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*"
-  }
+    origin: "*",
+  },
 });
 
-//  Socket Authentication Middleware
 io.use(async (socket, next) => {
   try {
     const token =
@@ -49,18 +48,14 @@ io.use(async (socket, next) => {
   }
 });
 
-
 io.on("connection", async (socket) => {
   socket.roomId = socket.project._id.toString();
 
   console.log("Client connected:", socket.user.email);
   socket.join(socket.roomId);
 
-
   const project = await projectModel.findById(socket.roomId);
-
   if (project) {
-   
     const alreadyExists = project.users.some(
       (u) => u.toString() === socket.user.id
     );
@@ -69,14 +64,12 @@ io.on("connection", async (socket) => {
       await project.save();
     }
 
-
     const updatedProject = await projectModel
       .findById(socket.roomId)
       .populate("users", "email");
 
     io.to(socket.roomId).emit("project-members", updatedProject.users);
   }
-
 
   socket.on("project-message", async (data) => {
     const message = data.message;
@@ -85,6 +78,7 @@ io.on("connection", async (socket) => {
     if (aiISpresentINmessage) {
       const prompt = message.replace("@ai", "");
       const result = await generateResult(prompt);
+
       io.to(socket.roomId).emit("project-message", {
         message: result,
         sender: { _id: "ai", email: "AI" },
@@ -93,28 +87,22 @@ io.on("connection", async (socket) => {
       return;
     }
 
-    io.to(socket.roomId).emit("project-message", {
+    socket.broadcast.to(socket.roomId).emit("project-message", {
       message: data.message,
       sender: socket.user.email,
       senderEmail: socket.user.email,
     });
   });
 
-
   socket.on("disconnect", async () => {
     console.log("Client disconnected:", socket.user.email);
-
-
     const project = await projectModel
       .findById(socket.roomId)
       .populate("users", "email");
-
     io.to(socket.roomId).emit("project-members", project.users);
     socket.leave(socket.roomId);
   });
 });
-
-
 
 server.listen(PORT, () => {
   console.log(`Socket server running on port ${PORT}`);

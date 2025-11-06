@@ -1,32 +1,30 @@
 import { io } from "socket.io-client";
 
-let socketInstance = null;
+let socket;
 
 export const initializeSocket = (projectId) => {
-  if (!socketInstance) {
+  if (!socket) {
     const token = localStorage.getItem("token");
-
-    socketInstance = io(import.meta.env.VITE_API_URL, {
+    socket = io("http://localhost:3000", {
       auth: { token },
       query: { projectId },
       transports: ["websocket"],
-      reconnection: true,
     });
-
-    console.log("Socket connected with token:", token);
   }
-  return socketInstance;
+  return socket;
 };
 
-
-export const receiveMessage = (eventName, callback) => {
-  socketInstance.on(eventName, callback);
+export const sendMessage = (event, data) => {
+  if (socket) socket.emit(event, data);
 };
 
-
-export const sendMessage = (eventName, data) => {
-  socketInstance.emit(eventName, data);
+export const receiveMessage = (event, callback) => {
+  if (socket) socket.on(event, callback);
 };
 
-
-
+export const disconnectSocket = () => {
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+};
