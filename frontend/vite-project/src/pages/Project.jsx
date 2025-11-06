@@ -19,11 +19,9 @@ const Project = () => {
   const { user } = useContext(UserContext);
   const projectId = location.state.project._id;
 
-  // 🧩 Load members + setup socket connection
   useEffect(() => {
     const socket = initializeSocket(projectId);
 
-    // Listen for chat messages
     receiveMessage("project-message", (data) => {
       setChatMessages((prev) => [...prev, { ...data, incoming: true }]);
       setTimeout(() => {
@@ -32,12 +30,10 @@ const Project = () => {
       }, 50);
     });
 
-    // 🟢 Listen for real-time member updates
     receiveMessage("project-members", (members) => {
       setProjectMembers(members);
     });
 
-    // Initial data load
     axiosInstance.get("/users/all").then((res) => setUsers(res.data.users));
     loadProjectMembers();
 
@@ -93,10 +89,9 @@ const Project = () => {
 
   const handleTyping = (e) => {
     setMessage(e.target.value);
-    // sendTyping(user.email); // optional if implemented
+
   };
 
-  // 🚪 Leave Project
   const handleLeaveProject = async () => {
     if (!window.confirm("Are you sure you want to leave this project?")) return;
 

@@ -91,10 +91,10 @@ export const leaveProject = async ({ projectId, userId }) => {
 
   if (!project) throw new Error("Project not found");
 
-  // remove user
+
   project.users = project.users.filter(u => u.toString() !== userId.toString());
 
-  // If no members left → delete project
+
   if (project.users.length === 0) {
     await projectModel.findByIdAndDelete(projectId);
     return { deleted: true };

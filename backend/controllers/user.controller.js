@@ -97,14 +97,14 @@ export const logoutController = async (req, res) => {
 };
 export const getAllUsersController = async (req, res) => {
   try {
-    //  Get logged-in user from token
+
     const loggedInUser = await userModel.findOne({ email: req.user.email });
 
     if (!loggedInUser) {
       return res.status(404).json({ error: "Logged-in user not found" });
     }
 
-    //  Get all users (excluding self, if you want)
+
     const allUsers = await userService.getAllUsers({ userId: loggedInUser._id });
 
     return res.status(200).json({

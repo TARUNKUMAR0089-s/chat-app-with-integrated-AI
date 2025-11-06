@@ -22,7 +22,7 @@ router.put(
     .bail()
     .custom((users) => users.every((user) => typeof user === "string"))
     .withMessage("each user must be a string"),
-  projectController.addUserToProject // ✅ fixed case
+  projectController.addUserToProject 
 );
 
 router.get('/get-project/:projectId',

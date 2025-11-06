@@ -18,12 +18,12 @@ export const initializeSocket = (projectId) => {
   return socketInstance;
 };
 
-// Listen to message
+
 export const receiveMessage = (eventName, callback) => {
   socketInstance.on(eventName, callback);
 };
 
-// Send message
+
 export const sendMessage = (eventName, data) => {
   socketInstance.emit(eventName, data);
 };

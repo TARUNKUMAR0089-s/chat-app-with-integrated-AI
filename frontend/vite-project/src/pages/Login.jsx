@@ -31,7 +31,6 @@ export default function Login() {
 
       console.log(" Login success:", res.data);
 
-      // Store token and update context
       localStorage.setItem("token", res.data.token);
       setUser(res.data.user);
      

@@ -49,18 +49,18 @@ io.use(async (socket, next) => {
   }
 });
 
-//  Socket Connection
+
 io.on("connection", async (socket) => {
   socket.roomId = socket.project._id.toString();
 
   console.log("Client connected:", socket.user.email);
   socket.join(socket.roomId);
 
-  // 🟢 Notify other users and update member list
+
   const project = await projectModel.findById(socket.roomId);
 
   if (project) {
-    // Add user if not already in project.users
+   
     const alreadyExists = project.users.some(
       (u) => u.toString() === socket.user.id
     );
@@ -69,7 +69,7 @@ io.on("connection", async (socket) => {
       await project.save();
     }
 
-    // Fetch updated members and send to everyone in this room
+
     const updatedProject = await projectModel
       .findById(socket.roomId)
       .populate("users", "email");
@@ -77,7 +77,7 @@ io.on("connection", async (socket) => {
     io.to(socket.roomId).emit("project-members", updatedProject.users);
   }
 
-  // 🟣 Handle messages
+
   socket.on("project-message", async (data) => {
     const message = data.message;
     const aiISpresentINmessage = message.includes("@ai");
@@ -100,11 +100,11 @@ io.on("connection", async (socket) => {
     });
   });
 
-  // 🔴 Handle disconnect
+
   socket.on("disconnect", async () => {
     console.log("Client disconnected:", socket.user.email);
 
-    // Optionally broadcast updated members
+
     const project = await projectModel
       .findById(socket.roomId)
       .populate("users", "email");
