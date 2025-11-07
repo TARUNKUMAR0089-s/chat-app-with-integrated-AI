@@ -15,7 +15,7 @@ connect();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "chat-app-with-integrated-ai.vercel.app",
   },
 });
 
