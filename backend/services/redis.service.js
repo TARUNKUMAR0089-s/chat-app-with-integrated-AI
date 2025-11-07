@@ -4,17 +4,15 @@ const redisClient = new Redis({
   host: process.env.REDIS_HOST,
   port: process.env.REDIS_PORT,
   password: process.env.REDIS_PASSWORD,
- tls: {
-    rejectUnauthorized: false, 
-  },
+  tls: {} 
 });
 
 redisClient.on('connect', () => {
-  console.log(' Redis connected');
+  console.log('Redis connected over TLS');
 });
 
 redisClient.on('error', (err) => {
-  console.error(' Redis connection error:', err);
+  console.error('Redis connection error:', err);
 });
 
 export default redisClient;
