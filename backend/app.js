@@ -12,11 +12,11 @@ connect();
 const app = express();
 app.use(cors({
   origin: [
-    "http://localhost:5173", // local dev
-    `https://${process.env.FRONTEND_URL}` // production
+    "http://localhost:5173",
+    `https://${process.env.FRONTEND_URL}` 
   ],
   credentials: true,
-  allowedHeaders: ["Content-Type", "Authorization"] // important for JWT
+  allowedHeaders: ["Content-Type", "Authorization"] 
 }));
 app.use(morgan('dev'));
 app.use(express.json());
