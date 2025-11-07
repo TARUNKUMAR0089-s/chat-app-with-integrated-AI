@@ -10,10 +10,13 @@ import cors from 'cors';
 connect();
 
 const app = express();
-
 app.use(cors({
- origin: process.env.FRONTEND_URL, 
-  credentials: true
+  origin: [
+    "http://localhost:5173", // local dev
+    `https://${process.env.FRONTEND_URL}` // production
+  ],
+  credentials: true,
+  allowedHeaders: ["Content-Type", "Authorization"] // important for JWT
 }));
 app.use(morgan('dev'));
 app.use(express.json());
