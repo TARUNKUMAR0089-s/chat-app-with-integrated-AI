@@ -13,6 +13,8 @@ export const authUser = async (req, res, next) => {
       token = req.cookies.token;
     }
 
+    console.log("Token from header:", token);
+    console.log("JWT_SECRET:", process.env.JWT_SECRET);
 
     if (!token) {
       console.log(" No token found in header or cookie");
