@@ -27,6 +27,9 @@ export const authUser = async (req, res, next) => {
            return res.status(401).json({ error: "Unauthorized " });
 
     }
+    console.log("Headers:", req.headers);
+    console.log("Cookies:", req.cookies);
+    console.log("Token from header:", token);
 
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
