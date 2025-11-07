@@ -13,11 +13,13 @@ const PORT = process.env.PORT || 3000;
 connect();
 
 const server = http.createServer(app);
-const io = new Server(server, {
+ const io = new Server(server, {
   cors: {
-    origin: "chat-app-with-integrated-ai.vercel.app",
+    origin: "https://chat-app-with-integrated-ai.vercel.app",
+    credentials: true
   },
 });
+
 
 io.use(async (socket, next) => {
   try {
