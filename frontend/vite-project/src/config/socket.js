@@ -5,7 +5,7 @@ let socket;
 export const initializeSocket = (projectId) => {
   if (!socket) {
     const token = localStorage.getItem("token");
-    socket = io("http://localhost:3000", {
+    socket = io("https://chat-app-with-integrated-ai.onrender.com", {
       auth: { token },
       query: { projectId },
       transports: ["websocket"],
