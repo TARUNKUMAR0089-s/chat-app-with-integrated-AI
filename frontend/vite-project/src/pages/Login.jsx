@@ -3,8 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import axiosInstance from "../config/axios";
 import { UserContext } from "../context/UserContext.jsx";
 
-
-
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -20,7 +18,6 @@ export default function Login() {
     }
 
     try {
-
       console.log(" axios baseURL:", axiosInstance.defaults.baseURL);
       console.log(" sending data:", { email, password });
       console.log(" Sending login request to:", axiosInstance.defaults.baseURL + "/users/login");
@@ -28,13 +25,12 @@ export default function Login() {
       const res = await axiosInstance.post("/users/login", { email, password }, {
         withCredentials: true,
       });
+      console.log("sending data:", {email, password});
 
       console.log(" Login success:", res.data);
 
       localStorage.setItem("token", res.data.token);
       setUser(res.data.user);
-     
-
       navigate("/");
     } catch (err) {
       console.error(" Login failed:", err.response?.data || err.message);

@@ -1,54 +1,71 @@
-import React, { useContext, useState ,useEffect} from 'react';
+import React, { useContext, useState, useEffect } from "react";
 import { UserContext } from "../context/UserContext.jsx";
 import axiosInstance from "../config/axios";
 import { motion, AnimatePresence } from "framer-motion";
-import { Link, useNavigate } from "react-router-dom";
-
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
   const { user } = useContext(UserContext);
+  const navigate = useNavigate();
 
+  const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
-  const [projects, setProjects] = useState([]);
-  const navigate=useNavigate()
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
  
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!projectName.trim()) return;
+  useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        setLoading(true);
+        const res = await axiosInstance.get("/projects/all");
+        setProjects(res.data.projects || []);
+        setError("");
+      } catch (err) {
+        console.log(err);
+        setError(err.response?.data?.error || "Failed to fetch projects");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  try {
-    const res = await axiosInstance.post("/projects/create", {
-      name: projectName.trim(),
-    });
+    fetchProjects();
+  }, []);
 
-    console.log("Project created:", res.data);
 
-    setProjects((prev) => [...prev, res.data.project]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!projectName.trim()) return;
 
-    setProjectName("");
-    setIsModalOpen(false);
-  } catch (err) {
-    console.error("Error creating project:", err);
-  }
-};
+    try {
+      setLoading(true);
+      const res = await axiosInstance.post("/projects/create", {
+        name: projectName.trim(),
+      });
 
-useEffect(()=>{
-  axiosInstance.get("/projects/all")
-    .then((res)=>{
-      setProjects(res.data.projects || []);
-    })
-    .catch(err=>{
-      console.log(err);
-    });
-}, []);
+      setProjects((prev) => [...prev, res.data.project]);
+      setProjectName("");
+      setIsModalOpen(false);
+      setError("");
+    } catch (err) {
+      console.error("Error creating project:", err);
+      setError(err.response?.data?.error || "Failed to create project");
+    } finally {
+      setLoading(false);
+    }
+  };
 
-     return (
-         <main className="p-6 relative min-h-screen bg-gray-50">
-     
+  return (
+    <main className="p-6 relative min-h-screen bg-gray-50">
+      <h1 className="text-2xl font-bold mb-4 text-gray-800">
+        Welcome, {user?.name || "User"}
+      </h1>
+
+      {loading && <p className="text-gray-500 mb-4">Loading...</p>}
+      {error && <p className="text-red-500 mb-4">{error}</p>}
+
       <div className="projects flex flex-wrap items-center gap-4">
-    
         <button
           onClick={() => setIsModalOpen(true)}
           className="project p-4 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition bg-white flex flex-col items-center justify-center"
@@ -56,36 +73,29 @@ useEffect(()=>{
           <i className="ri-links-fill text-2xl text-blue-600"></i>
           <span className="text-sm mt-2 text-gray-700">Create Project</span>
         </button>
+
         {projects.map((project) => (
-         <div 
-          key={project._id} 
-          onClick={()=>{
-            navigate('/project',{
-              state:{project}
-            })
-          }}
-           className=" flex flex-col cursor-pointer gap-2 p-4 bg-white border border-slate-300 rounded-xl shadow hover:bg-slate-300">
-           <h3 className="font-semibold text-gray-800">{project.name}</h3>
-
-                  <div className="flex gap-2 text-sm text-gray-500">
-                  👥 {project.users?.length || 1} Members 
-                  </div>
+          <div
+            key={project._id}
+            onClick={() =>
+              navigate("/project", {
+                state: { project },
+              })
+            }
+            className="flex flex-col cursor-pointer gap-2 p-4 bg-white border border-slate-300 rounded-xl shadow hover:bg-slate-300"
+          >
+            <h3 className="font-semibold text-gray-800">{project.name}</h3>
+            <div className="flex gap-2 text-sm text-gray-500">
+              👥 {project.users?.length || 1} Members
             </div>
-
-
-
-            ))}
-
-       
+          </div>
+        ))}
       </div>
 
-      
-
-      
+      {/* Modal */}
       <AnimatePresence>
         {isModalOpen && (
           <>
-         
             <motion.div
               className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40"
               initial={{ opacity: 0 }}
@@ -94,7 +104,6 @@ useEffect(()=>{
               onClick={() => setIsModalOpen(false)}
             />
 
-          
             <motion.div
               className="fixed inset-0 flex items-center justify-center p-4 z-50"
               initial={{ scale: 0.9, opacity: 0 }}
@@ -135,9 +144,10 @@ useEffect(()=>{
                     </button>
                     <button
                       type="submit"
-                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                      disabled={loading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition disabled:opacity-50"
                     >
-                      Save
+                      {loading ? "Saving..." : "Save"}
                     </button>
                   </div>
                 </form>
