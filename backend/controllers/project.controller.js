@@ -4,37 +4,38 @@ import userModel from '../models/user.models.js';
 import pkg from 'express-validator';
 const { validationResult } = pkg;
 
-export const createProject=async(req,res)=>{
-    const errors=validationResult(req)
-    if(!errors.isEmpty()){
-        return res.status(400).json({errors:errors.array()})
-    }
-   try {
-    const {name}=req.body;
-    const loggedINUser = await userModel.findOne({ email: req.user.email });
+export const createProject = async (req, res) => {
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
 
-    const userId=loggedINUser._id
-    
-     const existingProject = await projectModel.findOne({
+  try {
+    const { name } = req.body;
+    const loggedINUser = await userModel.findOne({ email: req.user.email });
+    const userId = loggedINUser._id;
+
+    const existingProject = await projectModel.findOne({
       name: name.toLowerCase(),
-      users: userId
+      users: userId,
     });
 
     if (existingProject) {
-      return res
-        .status(400)
-        .json({ error: "project name must be unique" });
+      return res.status(400).json({ error: "Project name must be unique" });
     }
+    const newProject = await projectService.createProject({ name, userId });
+    return res.status(201).json({
+      success: true,
+      message: "Project created successfully",
+      project: newProject,
+    });
 
-   const newProject = await projectService.createProject({ name, userId });
-    res.status(201).json(newProject)
- } catch (error) {
-    console.log(error)
-    res.status(400).send(error.message)
-    
-   }
+  } catch (error) {
+    console.error("Create Project Error:", error);
+    return res.status(500).json({ error: "Failed to create project" });
+  }
+};
 
-}
 export const addUserToProject = async (req, res) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {

@@ -5,7 +5,6 @@ import App from './App.jsx'
 import 'remixicon/fonts/remixicon.css'
 import { UserProvider } from "./context/UserContext.jsx";
 
-
 createRoot(document.getElementById('root')).render(
  
     <UserProvider>

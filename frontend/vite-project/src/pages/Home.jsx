@@ -14,7 +14,6 @@ const Home = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
- 
   useEffect(() => {
     const fetchProjects = async () => {
       try {
@@ -33,31 +32,39 @@ const Home = () => {
     fetchProjects();
   }, []);
 
-
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!projectName.trim()) return;
+  e.preventDefault();
+  if (!projectName.trim()) return;
 
-    try {
-      setLoading(true);
-      const res = await axiosInstance.post("/projects/create", {
-        name: projectName.trim(),
-      });
+  try {
+    setLoading(true);
+    const res = await axiosInstance.post("/projects/create", {
+      name: projectName.trim(),
+    });
 
-      setProjects((prev) => [...prev, res.data.project]);
-      setProjectName("");
-      setIsModalOpen(false);
-      setError("");
-    } catch (err) {
-      console.error("Error creating project:", err);
-      setError(err.response?.data?.error || "Failed to create project");
-    } finally {
-      setLoading(false);
+    if (!res.data?.success || !res.data?.project) {
+      throw new Error("Invalid server response");
     }
-  };
+
+    const newProject = res.data.project;
+    setProjects((prev) => [...prev, newProject]);
+    setProjectName("");
+    setIsModalOpen(false);
+    setError("");
+
+    setTimeout(() => {
+      navigate("/project", { state: { project: newProject } });
+    }, 500);
+  } catch (err) {
+    console.error("Error creating project:", err);
+    setError(err.response?.data?.error || "Failed to create project");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
-    <main className="p-6 relative min-h-screen bg-gray-50">
+    <main className="p-6 relative min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <h1 className="text-2xl font-bold mb-4 text-gray-800">
         Welcome, {user?.name || "User"}
       </h1>
@@ -66,29 +73,28 @@ const Home = () => {
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <div className="projects flex flex-wrap items-center gap-4">
+        {/* Create Button */}
         <button
           onClick={() => setIsModalOpen(true)}
-          className="project p-4 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition bg-white flex flex-col items-center justify-center"
+          className="p-4 border border-slate-300 rounded-xl shadow-sm hover:shadow-md transition bg-white flex flex-col items-center justify-center hover:scale-105"
         >
           <i className="ri-links-fill text-2xl text-blue-600"></i>
           <span className="text-sm mt-2 text-gray-700">Create Project</span>
         </button>
 
+        {/* Project List */}
         {projects.map((project) => (
-          <div
+          <motion.div
             key={project._id}
-            onClick={() =>
-              navigate("/project", {
-                state: { project },
-              })
-            }
-            className="flex flex-col cursor-pointer gap-2 p-4 bg-white border border-slate-300 rounded-xl shadow hover:bg-slate-300"
+            onClick={() => navigate("/project", { state: { project } })}
+            whileHover={{ scale: 1.05 }}
+            className="flex flex-col cursor-pointer gap-2 p-4 bg-white border border-slate-300 rounded-xl shadow hover:bg-blue-50 transition-all"
           >
             <h3 className="font-semibold text-gray-800">{project.name}</h3>
             <div className="flex gap-2 text-sm text-gray-500">
               👥 {project.users?.length || 1} Members
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
 
